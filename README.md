@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🛍️ Next.js Product Listing App
 
-## Getting Started
+A responsive product listing application built with **Next.js** and **Tailwind CSS**, demonstrating API integration, dynamic routing, filtering, and production-ready data handling.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- 📦 Product listing (image, title, price, category)
+- 🔍 Category filtering (API-driven)
+- 💰 Price range filtering
+- 📄 Dynamic product pages (`/product/[id]`)
+- ⚡ Responsive UI with Tailwind CSS
+- 🧠 SEO optimization (meta tags + JSON-LD)
+- 🛡️ Hybrid data layer (API + seed fallback)
+- ⚡ ISR caching for performance and freshness
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📦 API Sources
 
-## Learn More
+- Products: https://fakestoreapi.com/products  
+- Categories: https://fakestoreapi.com/products/categories  
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🧠 Data Strategy (Hybrid Approach)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project uses a **hybrid data system** combining:
 
-## Deploy on Vercel
+### 🟢 Seed Data (Local JSON)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The project includes local seed files:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `products.json`
+- `categories.json`
+
+These act as a **reliable fallback dataset**.
+
+### 🟡 External API (FakeStore)
+
+Live data is fetched from the FakeStore API with ISR caching enabled.
+
+---
+
+## ⚠️ Why Seeding Was Used
+
+During production deployment, the FakeStore API was found to:
+
+> 🚫 Block requests from the deployed server environment (IP-based blocking / rate limiting)
+
+This caused:
+
+- API request failures in production
+- Broken product pages
+- Inconsistent rendering
+- Unreliable user experience
+
+---
+
+## 🛡️ Solution
+
+A hybrid fallback system was implemented:
+
+- Use API data when available
+- Fall back to seeded local JSON when API fails
+- Enable ISR caching (`revalidate: 60`) for partial freshness
+- Ensure application always works regardless of API status
+
+---
+
+## 🏗️ Tech Stack
+
+- Next.js (App Router)
+- React
+- Tailwind CSS
+- Zod (schema validation)
+- FakeStore API
+
+---
+
+## 📁 Project Structure
+
+```txt
+src/
+├── app/
+│   ├── page.tsx
+│   ├── product/[id]/page.tsx
+│
+├── components/
+│   ├── ProductClient.tsx
+│   ├── ProductCard.tsx
+│   ├── SiteHeader.tsx
+│
+├── lib/
+│   ├── products.ts   # API + seed hybrid layer
+│
+├── data/
+│   ├── products.json
+│   ├── categories.json
+
