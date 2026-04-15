@@ -2,19 +2,32 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import SiteHeader from "@/components/SiteHeader";
-import { getProduct } from "@/lib/products";
+import { getProduct, getProducts } from "@/lib/products";
 import { notFound } from "next/navigation";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const products = await getProducts();
+
+  return products.map((p) => ({
+    id: String(p.id),
+  }));
+}
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
+
   const product = await getProduct(id);
 
   if (!product) {
-    return { title: "Product Not Found" };
+    return {
+      title: "Product Not Found",
+      description: "This product does not exist.",
+    };
   }
 
   return {
@@ -26,12 +39,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+/* ---------------- Page ---------------- */
 export default async function ProductDetailPage({ params }: Props) {
   const { id } = await params;
-
-  if (!id) {
-    notFound();
-  }
 
   const product = await getProduct(id);
 
@@ -52,19 +62,19 @@ export default async function ProductDetailPage({ params }: Props) {
         </Link>
 
         <div className="grid md:grid-cols-2 gap-12 animate-fade-in">
-          {/* Image Container */}
+          {/* Image */}
           <div className="bg-secondary rounded-lg p-10 flex items-center justify-center">
             <Image
               src={product.image}
               alt={product.title}
               width={500}
               height={500}
-              priority // Optimization for LCP
+              priority
               className="object-contain max-h-[500px]"
             />
           </div>
 
-          {/* Details Container */}
+          {/* Details */}
           <div className="flex flex-col justify-center">
             <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">
               {product.category}
@@ -91,6 +101,7 @@ export default async function ProductDetailPage({ params }: Props) {
         </div>
       </main>
 
+      {/* SEO JSON-LD */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
